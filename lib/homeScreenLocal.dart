@@ -13,27 +13,48 @@ class _HomeScreenLocalState extends State<HomeScreenLocal> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: RaisedButton(
-          onPressed: notification,
-          child: Text('Web Local Notificatin'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RaisedButton(
+              onPressed: sendLocalNotification,
+              child: Text('Send notification'),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            RaisedButton(
+              onPressed: scheduleLocalNotification,
+              child: Text('Schedule notification'),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  void notification() async {
+  void sendLocalNotification() async {
     var result = await html.Notification.requestPermission();
     if (result == 'granted') {
-      sendLocalNotification();
+      var title = "Flutter web",
+          body = "Test Notification From Flutter Web",
+          icon = "http://friano.me/favicon.png";
+
+      html.Notification(title, body: body, icon: icon);
     }
   }
 
-  void sendLocalNotification() async {
-    //https://friano.me/favicon.png
-    var title = "Flutter web";
-    var body = "Test Notification From Flutter Web";
-    var icon = "http://friano.me/favicon.png";
-
-    html.Notification(title, body: body, icon: icon);
+  void scheduleLocalNotification() async {
+    var reg = await html.window.navigator.serviceWorker.getRegistration();
+    var result = await html.Notification.requestPermission();
+    if (result == 'granted') {
+      var timestamp = DateTime.now().microsecondsSinceEpoch + 100 * 1000;
+      var data = {
+        "tag": timestamp, 
+        "body":"Schedule notification from flutter web",
+        // "showTrigger": html.window.navigator.ti(timestamp)
+      };
+      reg.showNotification('flutter web',data);
+    }
   }
 }
